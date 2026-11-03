@@ -13,7 +13,9 @@ export default function Glossario() {
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView edges={["top", "left", "right"]} style={styles.header}>
         <View style={styles.headerContent}>
-          <Text role="heading" style={styles.headerTitulo}>Glossário</Text>
+          <Text role="heading" style={styles.headerTitulo}>
+            Glossário
+          </Text>
         </View>
       </SafeAreaView>
 
@@ -22,7 +24,9 @@ export default function Glossario() {
           <View style={styles.lista}>
             {termos.map((termo) => (
               <View key={termo} style={styles.card}>
-                <Text role="heading" style={styles.termo}>{termo}</Text>
+                <Text role="heading" style={styles.termo}>
+                  {termo}
+                </Text>
                 <View style={styles.descricaoBox}>
                   <Text style={styles.descricao}>{descricao}</Text>
                 </View>
@@ -46,7 +50,12 @@ const styles = StyleSheet.create({
     paddingTop: 38,
     paddingBottom: 36,
   },
-  headerTitulo: { color: "#FFFFFF", fontSize: 34, lineHeight: 41, fontWeight: "700" },
+  headerTitulo: {
+    color: "#FFFFFF",
+    fontSize: 34,
+    lineHeight: 41,
+    fontWeight: "700",
+  },
   body: { flex: 1 },
   content: { paddingHorizontal: 48, paddingTop: 40, paddingBottom: 56 },
   lista: { width: "100%", maxWidth: 500, alignSelf: "center", gap: 18 },
