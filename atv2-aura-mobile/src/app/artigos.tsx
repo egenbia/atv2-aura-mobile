@@ -1,68 +1,78 @@
-import { useState } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
-import { Stack } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { listarArtigos, mensagemDeErro } from "@/services/api";
+import { Article } from "@/types/article";
+import { Status } from "@/types/status";
 
-export type StatusArtigo = "Incluído" | "Excluído" | "Pendente";
-
-export interface Article {
-  id: number;
-  titulo: string;
-  autores: string;
-  ano: number;
-  status: StatusArtigo;
-}
+const RotulosStatus: Record<Status, string> = {
+  incluido: "Incluído",
+  excluido: "Excluído",
+  pendente: "Pendente",
+};
 
 export default function Artigos() {
-  const [artigos] = useState<Article[]>([
-    {
-      id: 1,
-      titulo: "Aplicações de Aprendizado de Máquina no Apoio a Decisão Clínica",
-      autores: "Neves, F.; Costa, M.",
-      ano: 2020,
-      status: "Incluído",
-    },
-    {
-      id: 2,
-      titulo: "Aplicações de Aprendizado de Máquina no Apoio a Decisão Clínica",
-      autores: "Neves, F.; Costa, M.",
-      ano: 2020,
-      status: "Excluído",
-    },
-    {
-      id: 3,
-      titulo: "Aplicações de Aprendizado de Máquina no Apoio a Decisão Clínica",
-      autores: "Neves, F.; Costa, M.",
-      ano: 2020,
-      status: "Pendente",
-    },
-    {
-      id: 4,
-      titulo: "Aplicações de Aprendizado de Máquina no Apoio a Decisão Clínica",
-      autores: "Neves, F.; Costa, M.",
-      ano: 2020,
-      status: "Incluído",
-    },
-  ]);
+  // projetoId vem da navegação (Home -> /artigos?projetoId=1)
+  const { projetoId } = useLocalSearchParams<{ projetoId?: string }>();
 
-  const renderStatusBadge = (status: StatusArtigo) => {
+  const [artigos, setArtigos] = useState<Article[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [atualizando, setAtualizando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [tentativa, setTentativa] = useState(0);
+
+  const carregar = useCallback(async () => {
+    try {
+      setErro("");
+      setArtigos(await listarArtigos(projetoId ? Number(projetoId) : undefined));
+    } catch (e) {
+      setErro(mensagemDeErro(e, "os artigos"));
+    }
+  }, [projetoId]);
+
+  useEffect(() => {
+    let cancelado = false;
+    setCarregando(true);
+    carregar().finally(() => {
+      if (!cancelado) setCarregando(false);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [carregar, tentativa]);
+
+  async function aoAtualizar() {
+    setAtualizando(true);
+    await carregar();
+    setAtualizando(false);
+  }
+
+  const renderStatusBadge = (status: Status) => {
     switch (status) {
-      case "Incluído":
+      case "incluido":
         return (
           <View style={[styles.badge, styles.badgeIncluido]}>
-            <Text style={styles.textIncluido}>Incluído</Text>
+            <Text style={styles.textIncluido}>{RotulosStatus[status]}</Text>
           </View>
         );
-      case "Excluído":
+      case "excluido":
         return (
           <View style={[styles.badge, styles.badgeExcluido]}>
-            <Text style={styles.textExcluido}>Excluído</Text>
+            <Text style={styles.textExcluido}>{RotulosStatus[status]}</Text>
           </View>
         );
-      case "Pendente":
+      case "pendente":
         return (
           <View style={[styles.badge, styles.badgePendente]}>
-            <Text style={styles.textPendente}>Pendente</Text>
+            <Text style={styles.textPendente}>{RotulosStatus[status]}</Text>
           </View>
         );
     }
@@ -79,25 +89,42 @@ export default function Artigos() {
       </SafeAreaView>
 
       <SafeAreaView edges={["bottom", "left", "right"]} style={styles.body}>
-        <FlatList
-          data={artigos}
-          keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={styles.listContent}
-          ListHeaderComponent={
-            <Text style={styles.contadorTexto}>
-              {artigos.length} artigos encontrados
-            </Text>
-          }
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.cardTitulo}>{item.titulo}</Text>
-              <Text style={styles.cardAutores}>
-                {item.autores} &nbsp; {item.ano}
-              </Text>
-              {renderStatusBadge(item.status)}
-            </View>
-          )}
-        />
+        {carregando ? (
+          <ActivityIndicator size="large" color="#9B51F5" style={{ marginTop: 40 }} />
+        ) : erro !== "" && artigos.length === 0 ? (
+          <View style={styles.erroBox}>
+            <Text style={styles.erro}>{erro}</Text>
+            <TouchableOpacity style={styles.botao} onPress={() => setTentativa((t) => t + 1)}>
+              <Text style={styles.botaoTexto}>Tentar novamente</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            data={artigos}
+            keyExtractor={(item) => String(item.id)}
+            contentContainerStyle={styles.listContent}
+            refreshing={atualizando}
+            onRefresh={aoAtualizar}
+            ListHeaderComponent={
+              <>
+                {erro !== "" && <Text style={styles.erro}>{erro}</Text>}
+                <Text style={styles.contadorTexto}>
+                  {artigos.length} artigos encontrados
+                </Text>
+              </>
+            }
+            ListEmptyComponent={<Text style={styles.contadorTexto}>Nenhum artigo neste projeto.</Text>}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Text style={styles.cardTitulo}>{item.titulo}</Text>
+                <Text style={styles.cardAutores}>
+                  {item.autores} &nbsp; {item.ano}
+                </Text>
+                {renderStatusBadge(item.status)}
+              </View>
+            )}
+          />
+        )}
       </SafeAreaView>
     </View>
   );
@@ -167,6 +194,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 1,
   },
+  erroBox: { padding: 24, alignItems: "center", gap: 16 },
+  erro: { color: "#C62828", textAlign: "center" },
+  botao: { backgroundColor: "#9B51F5", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
+  botaoTexto: { color: "#FFFFFF", fontWeight: "600" },
   badgeIncluido: {
     backgroundColor: "#E8F8EE",
     borderColor: "#2E7D32",

@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet } from "react-native";
 
-export type Status = "incluido" | "excluido" | "pendente";
+import { Status } from "../types/status";
+
+export type { Status };
 
 const cores = {
   incluido: { bg: "#E6F7E6", borda: "#2E9E2E", texto: "#2E9E2E", label: "Incluído" },
