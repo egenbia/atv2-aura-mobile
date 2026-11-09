@@ -50,11 +50,18 @@ export default function Glossario() {
 
       <SafeAreaView edges={["bottom", "left", "right"]} style={styles.body}>
         {carregando ? (
-          <ActivityIndicator size="large" color="#9B51F5" style={{ marginTop: 40 }} />
+          <ActivityIndicator
+            size="large"
+            color="#9B51F5"
+            style={{ marginTop: 40 }}
+          />
         ) : erro !== "" ? (
           <View style={styles.erroBox}>
             <Text style={styles.erro}>{erro}</Text>
-            <TouchableOpacity style={styles.botao} onPress={() => setTentativa((t) => t + 1)}>
+            <TouchableOpacity
+              style={styles.botao}
+              onPress={() => setTentativa((t) => t + 1)}
+            >
               <Text style={styles.botaoTexto}>Tentar novamente</Text>
             </TouchableOpacity>
           </View>
@@ -64,7 +71,9 @@ export default function Glossario() {
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={styles.content}
             ItemSeparatorComponent={() => <View style={{ height: 18 }} />}
-            ListEmptyComponent={<Text style={styles.erro}>Nenhum termo cadastrado.</Text>}
+            ListEmptyComponent={
+              <Text style={styles.erro}>Nenhum termo cadastrado.</Text>
+            }
             renderItem={({ item }) => (
               <View style={styles.card}>
                 <Text role="heading" style={styles.termo}>
@@ -100,10 +109,22 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   body: { flex: 1 },
-  content: { paddingHorizontal: 48, paddingTop: 40, paddingBottom: 56, width: "100%", maxWidth: 596, alignSelf: "center" },
+  content: {
+    paddingHorizontal: 48,
+    paddingTop: 40,
+    paddingBottom: 56,
+    width: "100%",
+    maxWidth: 596,
+    alignSelf: "center",
+  },
   erroBox: { padding: 24, alignItems: "center", gap: 16 },
   erro: { color: "#C62828", textAlign: "center" },
-  botao: { backgroundColor: "#9B51F5", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
+  botao: {
+    backgroundColor: "#9B51F5",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
   botaoTexto: { color: "#FFFFFF", fontWeight: "600" },
   card: {
     backgroundColor: "#FFFFFF",

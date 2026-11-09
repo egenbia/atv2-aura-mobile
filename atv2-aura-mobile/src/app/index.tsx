@@ -54,11 +54,18 @@ export default function Home() {
       </View>
 
       {carregando ? (
-        <ActivityIndicator size="large" color="#9B59F6" style={{ marginTop: 40 }} />
+        <ActivityIndicator
+          size="large"
+          color="#9B59F6"
+          style={{ marginTop: 40 }}
+        />
       ) : erro !== "" && projetos.length === 0 ? (
         <View style={styles.erroBox}>
           <Text style={styles.erro}>{erro}</Text>
-          <TouchableOpacity style={styles.botao} onPress={() => setTentativa((t) => t + 1)}>
+          <TouchableOpacity
+            style={styles.botao}
+            onPress={() => setTentativa((t) => t + 1)}
+          >
             <Text style={styles.botaoTexto}>Tentar novamente</Text>
           </TouchableOpacity>
         </View>
@@ -68,11 +75,18 @@ export default function Home() {
           keyExtractor={(item) => String(item.id)}
           refreshing={atualizando}
           onRefresh={aoAtualizar}
-          ListHeaderComponent={erro !== "" ? <Text style={styles.erro}>{erro}</Text> : null}
-          ListEmptyComponent={<Text style={styles.vazio}>Nenhum projeto encontrado.</Text>}
+          ListHeaderComponent={
+            erro !== "" ? <Text style={styles.erro}>{erro}</Text> : undefined
+          }
+          ListEmptyComponent={
+            <Text style={styles.vazio}>Nenhum projeto encontrado.</Text>
+          }
           renderItem={({ item }) => (
             <Link
-              href={{ pathname: "/artigos", params: { projetoId: String(item.id) } }}
+              href={{
+                pathname: "/artigos",
+                params: { projetoId: String(item.id) },
+              }}
               asChild
             >
               <TouchableOpacity activeOpacity={0.8}>
@@ -99,6 +113,11 @@ const styles = StyleSheet.create({
   erroBox: { padding: 24, alignItems: "center", gap: 16 },
   erro: { color: "#C62828", textAlign: "center", marginVertical: 12 },
   vazio: { textAlign: "center", color: "#555", marginTop: 40 },
-  botao: { backgroundColor: "#9B59F6", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
+  botao: {
+    backgroundColor: "#9B59F6",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
   botaoTexto: { color: "#fff", fontWeight: "600" },
 });

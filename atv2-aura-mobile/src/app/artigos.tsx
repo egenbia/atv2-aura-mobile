@@ -20,7 +20,6 @@ const RotulosStatus: Record<Status, string> = {
 };
 
 export default function Artigos() {
-  // projetoId vem da navegação (Home -> /artigos?projetoId=1)
   const { projetoId } = useLocalSearchParams<{ projetoId?: string }>();
 
   const [artigos, setArtigos] = useState<Article[]>([]);
